@@ -11,11 +11,14 @@ export default async function handler(req, res) {
   try {
     const { prompt, type } = req.body;
 
-    // Prompts muy específicos por tipo
+    // Construir prompt ultra-específico basado en la descripción del usuario
+    const basePrompt = prompt || 'Architectural design';
+    
+    // Prompts muy detallados por tipo que mantienen TODOS los elementos
     const prompts = {
-      sketch: 'Professional architectural sketch of ' + prompt + '. Hand-drawn style, detailed line work, concept art, technical drawing, high contrast, pencil and ink, cross-hatching, architectural illustration, white background, clean composition',
-      plan: 'Technical architectural floor plan of ' + prompt + '. Top-down CAD view, precise measurements, construction blueprint, dimension lines, black and white, technical drawing, professional layout, scaled drawing, architectural documentation',
-      '3d': 'Photorealistic 3D architectural render of ' + prompt + '. Volumetric lighting, realistic materials, professional visualization, exterior view, depth of field, high quality, detailed textures, architectural photography style'
+      sketch: 'Professional architectural sketch of: ' + basePrompt + '. Hand-drawn pencil and ink style, technical drawing, concept art, detailed line work, cross-hatching, white background, clean composition, high contrast, architectural illustration',
+      plan: 'Technical architectural floor plan and elevation of: ' + basePrompt + '. Top-down CAD view, precise measurements, construction blueprint, dimension lines, black and white technical drawing, professional layout, scaled drawing, architectural documentation, section view',
+      '3d': 'Photorealistic 3D architectural render of: ' + basePrompt + '. Volumetric lighting, realistic materials, professional visualization, exterior view, depth of field, high quality, detailed textures, architectural photography style, 8k resolution'
     };
 
     const finalPrompt = prompts[type] || prompts.sketch;
