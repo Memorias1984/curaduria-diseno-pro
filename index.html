@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curaduria & Diseno PRO</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary:#4f46e5;--primary-dark:#3730a3;--secondary:#db2777;--accent:#0891b2;--bg:#ffffff;--card:#f8fafc;--border:#e2e8f0;--text:#1e293b;--text-muted:#64748b;--success:#16a34a;--error:#dc2626}
+        body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        .container{max-width:1400px;margin:0 auto;padding:20px}
+        .header{text-align:center;padding:40px 20px;margin-bottom:30px}
+        .header h1{font-size:3rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+        .header p{color:var(--text-muted);font-size:1.2rem;max-width:600px;margin:0 auto}
+        .badge{display:inline-flex;align-items:center;gap:8px;background:#eef2ff;border:1px solid var(--primary);padding:8px 16px;border-radius:50px;font-size:0.85rem;margin-top:15px;color:var(--primary)}
+        .main-grid{display:grid;grid-template-columns:1fr 1fr;gap:25px;margin-bottom:30px}
+        @media(max-width:968px){.main-grid{grid-template-columns:1fr}.header h1{font-size:2rem}}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:30px;transition:all 0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+        .card:hover{transform:translateY(-5px);box-shadow:0 10px 25px rgba(0,0,0,0.15);border-color:var(--primary)}
+        .card-title{font-size:1.3rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px;color:var(--primary)}
+        .card-title i{color:var(--primary)}
+        .input-group{margin-bottom:20px}
+        .input-group label{display:block;margin-bottom:8px;color:var(--text-muted);font-size:0.9rem;font-weight:500}
+        .input-group input,.input-group textarea{width:100%;padding:14px 18px;background:var(--bg);border:2px solid var(--border);border-radius:12px;color:var(--text);font-size:1rem;font-family:inherit}
+        .input-group input:focus,.input-group textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,0.1)}
+        .input-group textarea{min-height:120px;resize:vertical}
+        .upload-zone{border:2px dashed var(--border);border-radius:16px;padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.3s;background:#f1f5f9}
+        .upload-zone:hover{border-color:var(--primary);background:#eef2ff}
+        .upload-zone i{font-size:3rem;color:var(--primary);margin-bottom:15px;display:block}
+        .upload-zone p{color:var(--text-muted);margin-bottom:10px}
+        #file-input{display:none}
+        .preview-container{margin-top:20px;display:none}
+        .preview-container.active{display:block}
+        .preview-image{width:100%;max-height:300px;object-fit:contain;border-radius:12px;border:2px solid var(--border)}
+        .btn{padding:14px 28px;border:none;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.3s;display:inline-flex;align-items:center;gap:8px;font-family:inherit}
+        .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;box-shadow:0 4px 15px rgba(79,70,229,0.3)}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(79,70,229,0.4)}
+        .btn-secondary{background:var(--bg);color:var(--text);border:2px solid var(--border)}
+        .btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+        .btn-success{background:linear-gradient(135deg,var(--success),#15803d);color:white}
+        .btn-group{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+        .gen-types{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:25px}
+        .gen-type{padding:20px 15px;border:2px solid var(--border);border-radius:14px;text-align:center;cursor:pointer;transition:all 0.3s;background:var(--bg)}
+        .gen-type:hover{border-color:var(--primary);transform:translateY(-3px)}
+        .gen-type.active{border-color:var(--primary);background:#eef2ff;box-shadow:0 0 15px rgba(79,70,229,0.1)}
+        .gen-type i{font-size:2rem;margin-bottom:10px;display:block;color:var(--primary)}
+        .gen-type h4{font-size:0.95rem;margin-bottom:5px}
+        .gen-type p{font-size:0.75rem;color:var(--text-muted)}
+        .result-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+        .result-image{width:100%;max-height:500px;object-fit:cover;background:#f1f5f9}
+        .result-info{padding:20px}
+        .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.95);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:2000}
+        .loading-overlay.active{display:flex}
+        .spinner{width:80px;height:80px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .progress-container{width:300px;height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:15px 0}
+        .progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:3px;transition:width 0.3s;width:0%}
+        .toast{position:fixed;top:20px;right:20px;background:var(--bg);border:1px solid var(--border);border-left:4px solid var(--primary);padding:16px 24px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.15);z-index:4000;transform:translateX(500px);transition:transform 0.3s}
+        .toast.show{transform:translateX(0)}
+        .toast.error{border-left-color:var(--error)}
+        .toast.success{border-left-color:var(--success)}
+        .prompt-enhancer{background:#eef2ff;border:1px solid var(--primary);border-radius:16px;padding:25px;margin-top:20px}
+        .prompt-enhancer h3{color:var(--primary);margin-bottom:15px}
+        .enhanced-prompt{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:15px;font-family:'Courier New',monospace;font-size:0.9rem;color:var(--accent);line-height:1.6;white-space:pre-wrap}
+        .history-list{max-height:400px;overflow-y:auto;padding-right:10px}
+        .history-item{display:flex;align-items:center;gap:15px;padding:15px;background:var(--bg);border-radius:12px;margin-bottom:10px;border:1px solid var(--border);cursor:pointer}
+        .history-item:hover{border-color:var(--primary)}
+        .history-item img{width:60px;height:60px;object-fit:cover;border-radius:8px}
+        .history-item-info{flex:1}
+        .history-item-info h5{font-size:0.9rem;margin-bottom:4px}
+        .history-item-info span{font-size:0.75rem;color:var(--text-muted)}
+    </style>
+</head>
+<body>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div style="font-size:1.2rem;color:var(--text-muted)">Generando diseno profesional...</div>
+        <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+
+    <div class="toast" id="toast"><div id="toastMessage"></div></div>
+
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-palette"></i> Curaduria & Diseno PRO</h1>
+            <p>Genera bocetos profesionales, planos tecnicos y vistas 3D con Leonardo AI + Gemini</p>
+            <div class="badge"><i class="fas fa-bolt"></i><span>Consultoria Integrada</span></div>
+        </header>
+
+        <div class="main-grid">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-upload"></i> Entrada de Diseno</div>
+
+                <div style="display:flex;gap:5px;margin-bottom:25px;background:#f1f5f9;padding:5px;border-radius:12px;border:1px solid var(--border);">
+                    <button class="btn" style="flex:1;justify-content:center;background:var(--primary);color:white;" id="tabText" onclick="switchTab('text')">
+                        <i class="fas fa-keyboard"></i> Texto
+                    </button>
+                    <button class="btn" style="flex:1;justify-content:center;background:transparent;color:var(--text-muted);border:none;" id="tabImage" onclick="switchTab('image')">
+                        <i class="fas fa-image"></i> Imagen
+                    </button>
+                </div>
+
+                <div id="textTab">
+                    <div class="input-group">
+                        <label>Describe tu proyecto</label>
+                        <textarea id="designPrompt" placeholder="Ej: Casa moderna de 2 pisos con jardin interior, ventanales panoramicos..."></textarea>
+                    </div>
+                </div>
+
+                <div id="imageTab" style="display:none;">
+                    <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Arrastra una imagen o haz clic para subir</p>
+                        <span style="font-size:0.8rem;color:var(--text-muted);">PNG, JPG, WEBP (Max 5MB)</span>
+                    </div>
+                    <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
+                    <div class="preview-container" id="previewContainer">
+                        <img class="preview-image" id="previewImage">
+                        <div style="display:flex;gap:10px;margin-top:10px;justify-content:center;">
+                            <button class="btn btn-secondary" onclick="clearImage()"><i class="fas fa-trash"></i> Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <label style="display:block;margin-bottom:10px;color:var(--text-muted);font-size:0.9rem;font-weight:500;">Tipo de Generacion</label>
+                <div class="gen-types">
+                    <div class="gen-type active" onclick="selectGenType('sketch')" id="type-sketch">
+                        <i class="fas fa-pencil-ruler"></i><h4>Boceto</h4><p>Profesional y artistico</p>
+                    </div>
+                    <div class="gen-type" onclick="selectGenType('plan')" id="type-plan">
+                        <i class="fas fa-drafting-compass"></i><h4>Plano Tecnico</h4><p>Arquitectonico detallado</p>
+                    </div>
+                    <div class="gen-type" onclick="selectGenType('3d')" id="type-3d">
+                        <i class="fas fa-cube"></i><h4>Vista 3D</h4><p>Render tridimensional</p>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="generateDesign()"><i class="fas fa-magic"></i> Generar Diseno</button>
+                    <button class="btn btn-secondary" onclick="enhancePrompt()"><i class="fas fa-wand-magic-sparkles"></i> Mejorar con Gemini</button>
+                </div>
+
+                <div class="prompt-enhancer" id="promptEnhancer" style="display:none;">
+                    <h3><i class="fas fa-robot"></i> Prompt Optimizado</h3>
+                    <div class="enhanced-prompt" id="enhancedPrompt"></div>
+                    <button class="btn btn-success" onclick="useEnhancedPrompt()" style="margin-top:15px;width:100%;">
+                        <i class="fas fa-check"></i> Usar este Prompt
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-eye"></i> Resultados & Historial</div>
+                <div id="emptyState" style="text-align:center;padding:40px;color:var(--text-muted);">
+                    <i class="fas fa-drafting-compass" style="font-size:4rem;margin-bottom:15px;display:block;color:var(--primary);opacity:0.5;"></i>
+                    <p>Los resultados apareceran aqui</p>
+                </div>
+                <div id="resultsContainer"></div>
+                <div style="margin-top:25px;">
+                    <h4 style="margin-bottom:15px;display:flex;align-items:center;gap:8px;">
+                        <i class="fas fa-history" style="color:var(--primary);"></i> Historial
+                    </h4>
+                    <div class="history-list" id="historyList">
+                        <div style="text-align:center;color:var(--text-muted);padding:20px;">
+                            <i class="fas fa-inbox" style="font-size:2rem;margin-bottom:10px;display:block;"></i>
+                            No hay generaciones aun
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        let currentGenType = 'sketch';
+        let uploadedImageBase64 = null;
+        let generationHistory = JSON.parse(localStorage.getItem('designHistory') || '[]');
+        let enhancedPromptText = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory();
+            setupDragAndDrop();
+        });
+
+        function switchTab(tab) {
+            const t = document.getElementById('textTab'), i = document.getElementById('imageTab');
+            const bt = document.getElementById('tabText'), bi = document.getElementById('tabImage');
+            if(tab==='text'){t.style.display='block';i.style.display='none';bt.style.background='var(--primary)';bt.style.color='white';bi.style.background='transparent';bi.style.color='var(--text-muted)'}
+            else{t.style.display='none';i.style.display='block';bi.style.background='var(--primary)';bi.style.color='white';bt.style.background='transparent';bt.style.color='var(--text-muted)'}
+        }
+
+        function selectGenType(type) {
+            currentGenType = type;
+            document.querySelectorAll('.gen-type').forEach(t => t.classList.remove('active'));
+            document.getElementById(`type-${type}`).classList.add('active');
+        }
+
+        function setupDragAndDrop() {
+            const z = document.querySelector('.upload-zone');
+            ['dragenter','dragover','dragleave','drop'].forEach(e => z.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); }));
+            ['dragenter','dragover'].forEach(e => z.addEventListener(e, () => z.style.borderColor='var(--primary)'));
+            ['dragleave','drop'].forEach(e => z.addEventListener(e, () => z.style.borderColor='var(--border)'));
+            z.addEventListener('drop', e => { const f = e.dataTransfer.files; if(f.length) handleFiles(f); });
+        }
+
+        function handleFileSelect(e) { handleFiles(e.target.files); }
+
+        function handleFiles(files) {
+            if(!files.length) return;
+            const f = files[0];
+            if(!f.type.startsWith('image/')){showToast('Sube una imagen valida','error');return}
+            if(f.size>5*1024*1024){showToast('Maximo 5MB','error');return}
+            const r = new FileReader();
+            r.onload = e => { uploadedImageBase64 = e.target.result.split(',')[1]; document.getElementById('previewImage').src = e.target.result; document.getElementById('previewContainer').classList.add('active'); showToast('Imagen cargada','success'); };
+            r.readAsDataURL(f);
+        }
+
+        function clearImage() { uploadedImageBase64 = null; document.getElementById('file-input').value = ''; document.getElementById('previewContainer').classList.remove('active'); }
+
+        async function enhancePrompt() {
+            const p = document.getElementById('designPrompt').value;
+            if(!p.trim()){showToast('Escribe una descripcion','error');return}
+            showLoading('Analizando con Gemini...','Optimizando');
+            try {
+                const r = await fetch(`${API_URL}/api/gemini`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,mode:'enhance'})});
+                const d = await r.json();
+                if(d.success){enhancedPromptText=d.text;document.getElementById('enhancedPrompt').textContent=d.text;document.getElementById('promptEnhancer').style.display='block';showToast('Prompt optimizado','success')}
+                else throw new Error(d.error);
+            } catch(e){showToast('Error: '+e.message,'error')} finally{hideLoading()}
+        }
+
+        function useEnhancedPrompt(){document.getElementById('designPrompt').value=enhancedPromptText;document.getElementById('promptEnhancer').style.display='none';showToast('Prompt aplicado','success')}
+
+        async function generateDesign() {
+            const p = document.getElementById('designPrompt').value;
+            const isImage = document.getElementById('imageTab').style.display!=='none';
+            if(!p.trim()&&!isImage){showToast('Escribe descripcion o sube imagen','error');return}
+            if(isImage&&!uploadedImageBase64){showToast('Sube una imagen','error');return}
+            showLoading('Generando con Leonardo AI...','Creando diseno profesional');
+            updateProgress(10);
+            try {
+                const r = await fetch(`${API_URL}/api/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p||'Transform this image',type:currentGenType,useImage:isImage,imageData:uploadedImageBase64})});
+                updateProgress(70);
+                if(!r.ok){const e=await r.json();throw new Error(e.error||`Error ${r.status}`)}
+                const d = await r.json(); updateProgress(100);
+                if(d.success&&d.images){displayResults(d.images,d.prompt);addToHistory(d,currentGenType);showToast('Diseno generado!','success')}
+                else throw new Error('No se recibieron imagenes');
+            } catch(e){showToast('Error: '+e.message,'error');console.error(e)} finally{setTimeout(hideLoading,500)}
+        }
+
+        function displayResults(images,prompt){
+            document.getElementById('emptyState').style.display='none';
+            const c = document.getElementById('resultsContainer');
+            const labels={sketch:'Boceto Profesional',plan:'Plano Tecnico','3d':'Vista 3D'};
+            c.innerHTML=images.map((img,i)=>`<div class="result-card" style="animation:fadeIn 0.5s ${i*0.1}s both"><img src="${img.url}" class="result-image" alt="Resultado" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=Error'"><div class="result-info"><h4 style="color:var(--primary);margin-bottom:8px">${labels[currentGenType]} #${i+1}</h4><p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px">${prompt.substring(0,100)}...</p><div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="downloadImage('${img.url}')" style="flex:1;justify-content:center;padding:8px;font-size:0.85rem"><i class="fas fa-download"></i> Descargar</button><button class="btn btn-secondary" onclick="window.open('${img.url}','_blank')" style="flex:1;justify-content:center;padding:8px;font-size:0.85rem"><i class="fas fa-expand"></i> Ver</button></div></div></div>`).join('');
+        }
+
+        function downloadImage(url){const a=document.createElement('a');a.href=url;a.download=`diseno_${Date.now()}.png`;a.target='_blank';a.click();showToast('Descarga iniciada','success')}
+
+        function addToHistory(data,type){
+            const item={id:Date.now(),type,thumbnail:data.images[0]?.url,prompt:data.prompt,date:new Date().toLocaleString('es-ES'),generationId:data.generationId};
+            generationHistory.unshift(item); if(generationHistory.length>20)generationHistory.pop();
+            localStorage.setItem('designHistory',JSON.stringify(generationHistory)); renderHistory();
+        }
+
+        function renderHistory(){
+            const list=document.getElementById('historyList');
+            if(!generationHistory.length){list.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:20px"><i class="fas fa-inbox" style="font-size:2rem;margin-bottom:10px;display:block"></i>No hay generaciones aun</div>';return}
+            const labels={sketch:'Boceto',plan:'Plano','3d':'3D'};
+            list.innerHTML=generationHistory.map(item=>`<div class="history-item" onclick="window.open('${item.thumbnail}','_blank')"><img src="${item.thumbnail}" alt="History" onerror="this.src='https://via.placeholder.com/60?text=IMG'"><div class="history-item-info"><h5>${labels[item.type]||'Diseno'}</h5><span style="font-size:0.75rem;color:var(--text-muted)">${item.date}</span></div><i class="fas fa-chevron-right" style="color:var(--text-muted)"></i></div>`).join('');
+        }
+
+        function showLoading(text,subtext){document.getElementById('loadingOverlay').classList.add('active');document.getElementById('progressBar').style.width='0%'}
+        function hideLoading(){document.getElementById('loadingOverlay').classList.remove('active')}
+        function updateProgress(p){document.getElementById('progressBar').style.width=p+'%'}
+        function showToast(msg,type='info'){const t=document.getElementById('toast');t.className='toast '+type;document.getElementById('toastMessage').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000)}
+        document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter')generateDesign()});
+    </script>
+</body>
+</html>
