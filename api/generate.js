@@ -9,32 +9,16 @@ export default async function handler(req, res) {
   const LEONARDO_KEY = '615c70ed-88a8-49ef-b0ff-96616762f64d';
 
   try {
-    const { prompt, type, useImage, imageData } = req.body;
+    const { prompt, type } = req.body;
 
-    const modifiers = {
-      sketch: 'professional architectural sketch, hand-drawn style, detailed line work, concept art, technical drawing, high contrast',
-      plan: 'technical architectural floor plan, top-down CAD view, precise measurements, construction blueprint, dimension lines',
-      '3d': '3D architectural render, volumetric lighting, photorealistic, isometric view, depth of field, professional visualization'
+    // Prompts muy específicos por tipo
+    const prompts = {
+      sketch: 'Professional architectural sketch of ' + prompt + '. Hand-drawn style, detailed line work, concept art, technical drawing, high contrast, pencil and ink, cross-hatching, architectural illustration, white background, clean composition',
+      plan: 'Technical architectural floor plan of ' + prompt + '. Top-down CAD view, precise measurements, construction blueprint, dimension lines, black and white, technical drawing, professional layout, scaled drawing, architectural documentation',
+      '3d': 'Photorealistic 3D architectural render of ' + prompt + '. Volumetric lighting, realistic materials, professional visualization, exterior view, depth of field, high quality, detailed textures, architectural photography style'
     };
 
-    const finalPrompt = (prompt || 'Architectural design') + '. ' + (modifiers[type] || modifiers.sketch) + '. High quality, detailed, professional.';
-
-    let imageId = null;
-    if (useImage && imageData) {
-      const uploadRes = await fetch('https://cloud.leonardo.ai/api/rest/v1/init-image', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + LEONARDO_KEY,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ extension: 'png', content: imageData })
-      });
-      if (uploadRes.ok) {
-        const uploadData = await uploadRes.json();
-        imageId = uploadData.uploadInitImage?.id;
-      }
-    }
+    const finalPrompt = prompts[type] || prompts.sketch;
 
     const payload = {
       prompt: finalPrompt,
@@ -45,15 +29,6 @@ export default async function handler(req, res) {
       guidance_scale: 7,
       alchemy: true
     };
-
-    if (useImage && imageId) {
-      payload.controlnets = [{
-        initImageId: imageId,
-        initImageType: 'UPLOADED',
-        preprocessorId: 67,
-        strengthType: 'Low'
-      }];
-    }
 
     const genRes = await fetch('https://cloud.leonardo.ai/api/rest/v1/generations', {
       method: 'POST',
