@@ -11,17 +11,19 @@ export default async function handler(req, res) {
   try {
     const { prompt, type } = req.body;
 
-    // Construir prompt ultra-específico basado en la descripción del usuario
+    // El prompt del usuario ya viene detallado, lo usamos directamente
+    // pero le agregamos instrucciones técnicas muy específicas
     const basePrompt = prompt || 'Architectural design';
-    
-    // Prompts muy detallados por tipo que mantienen TODOS los elementos
-    const prompts = {
-      sketch: 'Professional architectural sketch of: ' + basePrompt + '. Hand-drawn pencil and ink style, technical drawing, concept art, detailed line work, cross-hatching, white background, clean composition, high contrast, architectural illustration',
-      plan: 'Technical architectural floor plan and elevation of: ' + basePrompt + '. Top-down CAD view, precise measurements, construction blueprint, dimension lines, black and white technical drawing, professional layout, scaled drawing, architectural documentation, section view',
-      '3d': 'Photorealistic 3D architectural render of: ' + basePrompt + '. Volumetric lighting, realistic materials, professional visualization, exterior view, depth of field, high quality, detailed textures, architectural photography style, 8k resolution'
+
+    // Instrucciones ultra-específicas por tipo
+    const styleInstructions = {
+      sketch: 'Technical architectural hand-drawn sketch, pencil and ink on white paper, detailed line work, cross-hatching for shadows, concept art, professional architectural illustration, clean composition, NO people, NO background buildings, isolated object on white background',
+      plan: 'Technical architectural floor plan, CAD drawing, top-down view, precise measurements, dimension lines, construction blueprint style, black and white, professional layout, NO perspective, NO people, technical documentation',
+      '3d': 'Photorealistic 3D architectural render, studio lighting, neutral gray background, professional product visualization, high quality materials, NO people, NO background environment, isolated object, 8k resolution'
     };
 
-    const finalPrompt = prompts[type] || prompts.sketch;
+    // Prompt final que combina la descripción del usuario con instrucciones técnicas
+    const finalPrompt = basePrompt + '. ' + styleInstructions[type] + '. Single object centered in frame.';
 
     const payload = {
       prompt: finalPrompt,
@@ -29,8 +31,10 @@ export default async function handler(req, res) {
       width: 1024,
       height: 1024,
       num_images: 1,
-      guidance_scale: 7,
-      alchemy: true
+      guidance_scale: 9,  // Aumentado para seguir más estrictamente el prompt
+      alchemy: true,
+      // Negative prompt para excluir lo que NO queremos
+      negative_prompt: 'people, humans, persons, crowd, maze, labyrinth, background buildings, cityscape, landscape, interior, room, furniture, table, chair, restaurant, cafe, street, cars, trees in background'
     };
 
     const genRes = await fetch('https://cloud.leonardo.ai/api/rest/v1/generations', {
