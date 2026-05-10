@@ -11,13 +11,19 @@ export default async function handler(req, res) {
   try {
     const { prompt, type, useImage, imageData } = req.body;
 
+    // Prompts que REFUERZAN mantener la estructura original
     const modifiers = {
       sketch: 'professional architectural sketch, hand-drawn style, detailed line work, concept art, technical drawing, high contrast',
       plan: 'technical architectural floor plan, top-down CAD view, precise measurements, construction blueprint, dimension lines',
       '3d': '3D architectural render, volumetric lighting, photorealistic, isometric view, depth of field, professional visualization'
     };
 
-    const finalPrompt = `${prompt || 'Architectural design'}. ${modifiers[type] || modifiers.sketch}. High quality, detailed, professional.`;
+    // Si hay imagen, el prompt DEBE referenciarla y pedir que mantenga la estructura
+    const userPrompt = prompt || 'Enhance this architectural design maintaining the original structure and layout';
+    
+    const finalPrompt = useImage && imageData
+      ? `${userPrompt}. Based on the provided reference image. MAINTAIN the original structure, proportions, hexagonal elements, green wall design, and spatial layout exactly. Apply style: ${modifiers[type] || modifiers.sketch}. Do not invent new rooms, furniture, or structures. Keep the same building exterior/interior concept.`
+      : `${userPrompt}. ${modifiers[type] || modifiers.sketch}. High quality, detailed, professional.`;
 
     let imageId = null;
     if (useImage && imageData) {
@@ -46,12 +52,13 @@ export default async function handler(req, res) {
       alchemy: true
     };
 
+    // ControlNet con ALTA fuerza para respetar la imagen original
     if (useImage && imageId) {
       payload.controlnets = [{
         initImageId: imageId,
         initImageType: 'UPLOADED',
         preprocessorId: 67,
-        strengthType: 'Low'
+        strengthType: 'High'  // CAMBIADO: de 'Low' a 'High' para respetar más la imagen
       }];
     }
 
@@ -111,7 +118,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: error.message });
   }
 }
-
-      
-   
-    
